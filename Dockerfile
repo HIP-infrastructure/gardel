@@ -3,8 +3,8 @@ ARG TAG
 ARG DOCKERFS_TYPE
 ARG DOCKERFS_VERSION
 ARG JUPYTERLAB_DESKTOP_VERSION
-FROM ${CI_REGISTRY_IMAGE}/<base-image:version>${TAG}
-LABEL maintainer="<maintainer@example.com>"
+FROM ${CI_REGISTRY_IMAGE}/matlab-runtime:R2015a_u0${TAG}
+LABEL maintainer="nathalie.casati@chuv.ch"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CARD
@@ -19,18 +19,28 @@ WORKDIR /apps/${APP_NAME}
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y \ 
-    curl -# <app> && \
-    apt-get remove -y --purge curl && \
-    apt-get autoremove -y --purge && \
-    apt-get clean && \
+    apt-get install --no-install-recommends -y \
+    curl unzip && \
+    curl -OL# http://meg.univ-amu.fr/GARDEL/GARDEL_linux.zip && \
+    mkdir ./install && \
+    unzip -q -d ./install GARDEL_linux.zip && \
+    chmod 755 ./install/GARDEL_standalone/GARDELv2 && \
+    echo /usr/local/MATLAB/MATLAB_Runtime/v85/bin/glnxa64 > /etc/ld.so.conf.d/matlab.conf && \
+    echo /usr/local/MATLAB/MATLAB_Runtime/v85/runtime/glnxa64 >> /etc/ld.so.conf.d/matlab.conf && \
+#    echo /usr/local/MATLAB/MATLAB_Runtime/v85/sys/os/glnxa64 >> /etc/ld.so.conf.d/matlab.conf && \
+    echo /usr/local/MATLAB/MATLAB_Runtime/v85/extern/bin/glnxa64 >> /etc/ld.so.conf.d/matlab.conf && \
+    ldconfig && \
+    rm GARDEL_linux.zip && \
+    #apt-get remove -y --purge curl unzip && \
+    #apt-get autoremove -y --purge && \
+    #apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV APP_SPECIAL="<option>"
-ENV APP_CMD="</path/to/app/executable>"
-ENV PROCESS_NAME="<app_process_name>"
-ENV APP_DATA_DIR_ARRAY="<app_config_dir .app_config_dir>"
-ENV DATA_DIR_ARRAY="<app_data_dir1 app_data_dir2>"
+ENV APP_SPECIAL="no"
+ENV APP_CMD="sleep 100000000"
+ENV PROCESS_NAME="sleep"
+ENV APP_DATA_DIR_ARRAY=""
+ENV DATA_DIR_ARRAY=""
 
 HEALTHCHECK --interval=10s --timeout=10s --retries=5 --start-period=30s \
   CMD sh -c "/apps/${APP_NAME}/scripts/process-healthcheck.sh \
