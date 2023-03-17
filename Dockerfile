@@ -21,7 +21,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install --no-install-recommends -y \
     curl unzip && \
-    curl -OL# http://meg.univ-amu.fr/GARDEL/GARDEL_linux.zip && \
+    curl -sSOL http://meg.univ-amu.fr/GARDEL/GARDEL_linux.zip && \
     mkdir ./install && \
     unzip -q -d ./install GARDEL_linux.zip && \
     chmod 755 ./install/GARDEL_standalone/GARDELv2 && \
